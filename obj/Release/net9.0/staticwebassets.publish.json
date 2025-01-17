@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "RyUIn9/SWtmgKbnY81dIZq7lEO8OLuFz7jrSzCU36kI=",
+  "Source": "App_web_book",
+  "BasePath": "_content/App_web_book",
+  "Mode": "Default",
+  "ManifestType": "Publish",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}
