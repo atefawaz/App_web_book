@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("App_web_book")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1f084958c1963b396c858421c9f5316bd84e9f31")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e147fae8aeb16e5251fd37c2b6351f47dde2b342")]
 [assembly: System.Reflection.AssemblyProductAttribute("App_web_book")]
 [assembly: System.Reflection.AssemblyTitleAttribute("App_web_book")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

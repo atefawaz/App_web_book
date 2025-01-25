@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using App_web_book.library;
+using App_web_book.Dtos;
+using App_web_book.Services;
 
 namespace App_web_book.Controllers
 {
@@ -7,30 +8,30 @@ namespace App_web_book.Controllers
     [ApiController]
     public class BookManagementController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly IBookService _bookService;
 
-        public BookManagementController(ApplicationDbContext dbContext)
+        public BookManagementController(IBookService bookService)
         {
-            _dbContext = dbContext;
+            _bookService = bookService;
         }
 
         // Retrieve all books
         [HttpGet("all")]
-        public ActionResult<IEnumerable<Book>> GetAllBooks()
+        public async Task<IActionResult> GetAllBooks()
         {
-            var books = _dbContext.Books.ToList();
-            if (!books.Any())
+            var books = await _bookService.GetAllBooksAsync();
+            if (books == null || !books.Any())
             {
-                return NoContent();
+                return NoContent(); // Return 204 if there are no books
             }
             return Ok(books);
         }
 
         // Retrieve a specific book by ID
         [HttpGet("{bookId}")]
-        public IActionResult GetBookById(int bookId)
+        public async Task<IActionResult> GetBookById(int bookId)
         {
-            var book = _dbContext.Books.Find(bookId);
+            var book = await _bookService.GetBookByIdAsync(bookId);
             if (book == null)
             {
                 return NotFound(new { message = $"Book with ID {bookId} not found." });
@@ -40,53 +41,43 @@ namespace App_web_book.Controllers
 
         // Add a new book
         [HttpPost("create")]
-        public IActionResult AddBook([FromBody] Book bookToAdd)
+        public async Task<IActionResult> AddBook([FromBody] CreateBookDto bookToAdd)
         {
             if (bookToAdd == null)
             {
                 return BadRequest(new { message = "Book data cannot be null." });
             }
 
-            _dbContext.Books.Add(bookToAdd);
-            _dbContext.SaveChanges();
-
-            return CreatedAtAction(nameof(GetBookById), new { bookId = bookToAdd.Id }, bookToAdd);
+            var book = await _bookService.AddBookAsync(bookToAdd);
+            return CreatedAtAction(nameof(GetBookById), new { bookId = book.Id }, book);
         }
 
         // Update an existing book
         [HttpPut("update/{bookId}")]
-        public IActionResult UpdateBook(int bookId, [FromBody] Book bookDetails)
+        public async Task<IActionResult> UpdateBook(int bookId, [FromBody] CreateBookDto bookUpdates)
         {
-            var existingBook = _dbContext.Books.Find(bookId);
-            if (existingBook == null)
+            if (bookUpdates == null)
+            {
+                return BadRequest(new { message = "Book update data cannot be null." });
+            }
+
+            var result = await _bookService.UpdateBookAsync(bookId, bookUpdates);
+            if (!result)
             {
                 return NotFound(new { message = $"Book with ID {bookId} not found." });
             }
-
-            existingBook.Name = bookDetails.Name;
-            existingBook.Author = bookDetails.Author;
-            existingBook.Genre = bookDetails.Genre;
-            existingBook.NumberOfPages = bookDetails.NumberOfPages;
-            existingBook.PublicationDate = bookDetails.PublicationDate;
-
-            _dbContext.SaveChanges();
-
             return Ok(new { message = "Book updated successfully." });
         }
 
         // Delete a book by ID
         [HttpDelete("delete/{bookId}")]
-        public IActionResult RemoveBook(int bookId)
+        public async Task<IActionResult> RemoveBook(int bookId)
         {
-            var bookToDelete = _dbContext.Books.Find(bookId);
-            if (bookToDelete == null)
+            var result = await _bookService.DeleteBookAsync(bookId);
+            if (!result)
             {
-                return NotFound(new { message = $"Book with ID {bookId} does not exist." });
+                return NotFound(new { message = $"Book with ID {bookId} not found." });
             }
-
-            _dbContext.Books.Remove(bookToDelete);
-            _dbContext.SaveChanges();
-
             return Ok(new { message = "Book deleted successfully." });
         }
     }

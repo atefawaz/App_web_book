@@ -1,5 +1,8 @@
+using App_web_book.Data;
 using Microsoft.AspNetCore.Mvc;
-using App_web_book.library;
+using App_web_book.Entities.VSDCEntities;
+using App_web_book.Data.VSDC;
+using App_web_book.Entities;
 
 namespace App_web_book.Controllers
 {
@@ -7,18 +10,18 @@ namespace App_web_book.Controllers
     [Route("api/users")]
     public class UserController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly AtefContext _context;
 
-        public UserController(ApplicationDbContext dbContext)
+        public UserController(AtefContext context)
         {
-            _dbContext = dbContext;
+            _context = context;
         }
 
         // Retrieve all users
         [HttpGet("all")]
         public ActionResult<IEnumerable<User>> GetAllUsers()
         {
-            var users = _dbContext.Users.ToList();
+            var users = _context.Users.ToList();
             if (!users.Any())
             {
                 return NoContent();
@@ -30,7 +33,7 @@ namespace App_web_book.Controllers
         [HttpGet("{userId}")]
         public IActionResult GetUserById(int userId)
         {
-            var user = _dbContext.Users.Find(userId);
+            var user = _context.Users.Find(userId);
             if (user == null)
             {
                 return NotFound(new { message = $"User with ID {userId} not found." });
@@ -47,8 +50,8 @@ namespace App_web_book.Controllers
                 return BadRequest(new { message = "User data cannot be null." });
             }
 
-            _dbContext.Users.Add(newUser);
-            _dbContext.SaveChanges();
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
 
             return CreatedAtAction(nameof(GetUserById), new { userId = newUser.Id }, newUser);
         }
@@ -57,7 +60,7 @@ namespace App_web_book.Controllers
         [HttpPut("edit/{userId}")]
         public IActionResult UpdateUser(int userId, [FromBody] User userUpdates)
         {
-            var existingUser = _dbContext.Users.Find(userId);
+            var existingUser = _context.Users.Find(userId);
             if (existingUser == null)
             {
                 return NotFound(new { message = $"User with ID {userId} not found." });
@@ -67,7 +70,7 @@ namespace App_web_book.Controllers
             existingUser.Email = userUpdates.Email;
             existingUser.Password = userUpdates.Password;
 
-            _dbContext.SaveChanges();
+            _context.SaveChanges();
 
             return Ok(new { message = "User details updated successfully." });
         }
@@ -76,14 +79,14 @@ namespace App_web_book.Controllers
         [HttpDelete("remove/{userId}")]
         public IActionResult DeleteUser(int userId)
         {
-            var userToDelete = _dbContext.Users.Find(userId);
+            var userToDelete = _context.Users.Find(userId);
             if (userToDelete == null)
             {
                 return NotFound(new { message = $"User with ID {userId} not found." });
             }
 
-            _dbContext.Users.Remove(userToDelete);
-            _dbContext.SaveChanges();
+            _context.Users.Remove(userToDelete);
+            _context.SaveChanges();
 
             return Ok(new { message = "User deleted successfully." });
         }
